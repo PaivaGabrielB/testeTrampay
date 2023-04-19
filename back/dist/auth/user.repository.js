@@ -11,7 +11,7 @@ const typeorm_1 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 let UserRepository = class UserRepository extends typeorm_1.Repository {
     async findByEmail(email) {
-        return this.findOne({ email });
+        return this.findOne({ where: { email } });
     }
 };
 UserRepository = __decorate([

@@ -1,9 +1,10 @@
+import { User } from './user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from './user.repository';
-import { User } from './user.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { FindOneOptions } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,7 @@ export class AuthService {
 
   async validateUser(username: string, password: string): Promise<any> {
     // Aqui você deve buscar o usuário pelo nome de usuário na sua base de dados
-    const user = await User.findOne({ where: { username } });
+    const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user) {
       return null;
@@ -40,7 +41,7 @@ export class AuthService {
 
   async forgotPassword(username: string) {
     // Aqui você deve buscar o usuário pelo nome de usuário na sua base de dados
-    const user = await User.findOne({ where: { username } });
+    const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user) {
       return null;
@@ -67,7 +68,15 @@ export class AuthService {
 
   async resetPassword(token: string, password: string): Promise<void> {
     // Busca o usuário pelo token de recuperação de senha
-    const user = await this.userRepository.findOne({ resetPasswordToken: token });
+
+    type UserFindOptions = FindOneOptions<User> & {
+      resetPasswordToken?: string;
+    };
+    const user = await this.userRepository.findOne<UserFindOptions>({
+      where: {
+        resetPasswordToken: token,
+      },
+    });
 
     if (!user) {
       throw new Error('Token inválido');
@@ -78,7 +87,7 @@ export class AuthService {
     user.password = hashedPassword;
 
     // Limpa o token de recuperação de senha
-    user.resetPasswordToken = null;
+    await this.userRepository.save(user);
 
     // Salva as alterações no banco de dados
     await this.userRepository.save(user);

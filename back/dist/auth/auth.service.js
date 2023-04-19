@@ -25,14 +25,13 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcryptjs");
 const user_repository_1 = require("./user.repository");
-const user_entity_1 = require("./user.entity");
 let AuthService = class AuthService {
     constructor(jwtService, userRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
     }
     async validateUser(username, password) {
-        const user = await user_entity_1.User.findOne({ where: { username } });
+        const user = await this.userRepository.findOne({ where: { username } });
         if (!user) {
             return null;
         }
@@ -50,7 +49,7 @@ let AuthService = class AuthService {
         };
     }
     async forgotPassword(username) {
-        const user = await user_entity_1.User.findOne({ where: { username } });
+        const user = await this.userRepository.findOne({ where: { username } });
         if (!user) {
             return null;
         }
@@ -65,13 +64,16 @@ let AuthService = class AuthService {
         return true;
     }
     async resetPassword(token, password) {
-        const user = await this.userRepository.findOne({ resetPasswordToken: token });
+        const user = await this.userRepository.findOne({
+            where: { resetPasswordToken: token },
+            select: ['id', 'email', 'username'],
+        });
         if (!user) {
             throw new Error('Token inválido');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         user.password = hashedPassword;
-        user.resetPasswordToken = null;
+        await this.userRepository.save(user);
         await this.userRepository.save(user);
     }
 };

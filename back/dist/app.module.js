@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const csv_module_1 = require("./csv/csv.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -21,7 +22,7 @@ AppModule = __decorate([
                 password: 'your_password',
                 database: 'your_database',
                 entities: [__dirname + '/**/*.entity{.ts,.js}'], synchronize: true,
-            }),],
+            }), csv_module_1.CsvModule,],
     })
 ], AppModule);
 exports.AppModule = AppModule;
