@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from './user.repository';
-import { v4 as uuidv4 } from 'uuid';
 import { FindOneOptions } from 'typeorm';
 
 @Injectable()
